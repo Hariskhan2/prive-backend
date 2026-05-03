@@ -48,6 +48,7 @@ model UserPreference {
   allowVoiceCalls    Boolean @default(true)
   allowAttachments   Boolean @default(true)
   allowNotifications Boolean @default(true)
+  alwaysKeepAttachments Boolean @default(false)
 
   profile Profile @relation(fields: [userId], references: [id])
 }

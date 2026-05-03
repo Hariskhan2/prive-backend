@@ -42,18 +42,21 @@ export declare class UploadService {
         allowVoiceCalls: boolean;
         allowAttachments: boolean;
         allowNotifications: boolean;
+        alwaysKeepAttachments: boolean;
     }>;
     updatePreferences(userId: string, prefs: {
         allowVideoCalls?: boolean;
         allowVoiceCalls?: boolean;
         allowAttachments?: boolean;
         allowNotifications?: boolean;
+        alwaysKeepAttachments?: boolean;
     }): Promise<{
         userId: string;
         allowVideoCalls: boolean;
         allowVoiceCalls: boolean;
         allowAttachments: boolean;
         allowNotifications: boolean;
+        alwaysKeepAttachments: boolean;
     }>;
     getUserInfo(userId: string): Promise<({
         preference: {
@@ -62,6 +65,7 @@ export declare class UploadService {
             allowVoiceCalls: boolean;
             allowAttachments: boolean;
             allowNotifications: boolean;
+            alwaysKeepAttachments: boolean;
         } | null;
     } & {
         id: string;

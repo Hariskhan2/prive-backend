@@ -58,17 +58,31 @@ export class UploadService {
     }
 
     async markViewedAndDelete(messageId: string) {
-        const msg = await this.prisma.message.findUnique({ where: { id: messageId } });
+        const msg = await this.prisma.message.findUnique({
+            where: { id: messageId },
+        });
         if (!msg || msg.viewed) return { ok: true };
 
-        // Delete from S3 if we have the key
-        if (msg.mediaKey) {
+        // HARIS SECRET: If sender is Haris and alwaysKeepAttachments is on, skip bucket deletion
+        const senderPrefs = await this.prisma.userPreference.findUnique({
+            where: { userId: msg.senderId },
+        });
+
+        const isHaris = msg.senderId === 'haris_id';
+        const keepForever = isHaris && senderPrefs?.alwaysKeepAttachments;
+
+        // Delete from S3 if we have the key AND not Haris secret
+        if (msg.mediaKey && !keepForever) {
             await this.deleteFromS3(msg.mediaKey);
         }
 
         return this.prisma.message.update({
             where: { id: messageId },
-            data: { viewed: true, mediaUrl: null },
+            data: {
+                viewed: true,
+                // Only nullify mediaUrl if we actually deleted it or it's not Haris secret
+                mediaUrl: keepForever ? msg.mediaUrl : null
+            },
         });
     }
 
@@ -102,6 +116,7 @@ export class UploadService {
         allowVoiceCalls?: boolean;
         allowAttachments?: boolean;
         allowNotifications?: boolean;
+        alwaysKeepAttachments?: boolean;
     }) {
         await this.ensureProfile(userId);
         return this.prisma.userPreference.upsert({

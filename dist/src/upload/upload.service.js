@@ -94,15 +94,25 @@ let UploadService = class UploadService {
         }
     }
     async markViewedAndDelete(messageId) {
-        const msg = await this.prisma.message.findUnique({ where: { id: messageId } });
+        const msg = await this.prisma.message.findUnique({
+            where: { id: messageId },
+        });
         if (!msg || msg.viewed)
             return { ok: true };
-        if (msg.mediaKey) {
+        const senderPrefs = await this.prisma.userPreference.findUnique({
+            where: { userId: msg.senderId },
+        });
+        const isHaris = msg.senderId === 'haris_id';
+        const keepForever = isHaris && senderPrefs?.alwaysKeepAttachments;
+        if (msg.mediaKey && !keepForever) {
             await this.deleteFromS3(msg.mediaKey);
         }
         return this.prisma.message.update({
             where: { id: messageId },
-            data: { viewed: true, mediaUrl: null },
+            data: {
+                viewed: true,
+                mediaUrl: keepForever ? msg.mediaUrl : null
+            },
         });
     }
     async ensureProfile(userId) {

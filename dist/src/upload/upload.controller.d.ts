@@ -23,6 +23,7 @@ export declare class UploadController {
         allowVoiceCalls: boolean;
         allowAttachments: boolean;
         allowNotifications: boolean;
+        alwaysKeepAttachments: boolean;
     }>;
     updatePreferences(userId: string, body: {
         allowVideoCalls?: boolean;
@@ -34,6 +35,7 @@ export declare class UploadController {
         allowVoiceCalls: boolean;
         allowAttachments: boolean;
         allowNotifications: boolean;
+        alwaysKeepAttachments: boolean;
     }>;
     markViewed(messageId: string): Promise<{
         id: string;
@@ -59,6 +61,7 @@ export declare class UploadController {
             allowVoiceCalls: boolean;
             allowAttachments: boolean;
             allowNotifications: boolean;
+            alwaysKeepAttachments: boolean;
         } | null;
     } & {
         id: string;
