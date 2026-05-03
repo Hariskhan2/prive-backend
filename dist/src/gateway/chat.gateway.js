@@ -139,7 +139,7 @@ let ChatGateway = class ChatGateway {
         }
     }
     handleOffer(payload, client) {
-        client.broadcast.emit('offer', { offer: payload.offer, senderId: client.id });
+        client.broadcast.emit('offer', { offer: payload.offer, isVideo: payload.isVideo, senderId: client.id });
     }
     handleAnswer(payload, client) {
         client.broadcast.emit('answer', { answer: payload.answer, senderId: client.id });

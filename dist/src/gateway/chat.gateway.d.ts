@@ -36,6 +36,7 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     }): Promise<void>;
     handleOffer(payload: {
         offer: any;
+        isVideo?: boolean;
     }, client: Socket): void;
     handleAnswer(payload: {
         answer: any;

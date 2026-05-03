@@ -158,8 +158,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // --- WebRTC Signaling ---
     @SubscribeMessage('offer')
-    handleOffer(@MessageBody() payload: { offer: any }, @ConnectedSocket() client: Socket) {
-        client.broadcast.emit('offer', { offer: payload.offer, senderId: client.id });
+    handleOffer(@MessageBody() payload: { offer: any; isVideo?: boolean }, @ConnectedSocket() client: Socket) {
+        client.broadcast.emit('offer', { offer: payload.offer, isVideo: payload.isVideo, senderId: client.id });
     }
 
     @SubscribeMessage('answer')
