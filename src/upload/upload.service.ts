@@ -141,7 +141,7 @@ export class UploadService {
         }
 
         if (profile.password !== passwordReq) {
-            throw new Error('Invalid password');
+            throw new UnauthorizedException('Invalid password');
         }
 
         const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
@@ -151,9 +151,9 @@ export class UploadService {
     async changePassword(userId: string, oldPassword?: string, newPassword?: string) {
         const profile = await this.prisma.profile.findUnique({ where: { id: userId } });
         if (!profile || profile.password !== oldPassword) {
-            throw new Error('Invalid old password');
+            throw new UnauthorizedException('Invalid old password');
         }
-        if (!newPassword || newPassword.length < 4) throw new Error('Invalid new password');
+        if (!newPassword || newPassword.length < 4) throw new BadRequestException('Invalid new password');
 
         return this.prisma.profile.update({
             where: { id: userId },

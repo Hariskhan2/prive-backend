@@ -49,6 +49,7 @@ const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const crypto = __importStar(require("crypto"));
 const jwt = __importStar(require("jsonwebtoken"));
 const prisma_service_1 = require("../prisma/prisma.service");
+const common_2 = require("@nestjs/common");
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-prive-key-123';
 let UploadService = class UploadService {
     prisma;
@@ -158,7 +159,7 @@ let UploadService = class UploadService {
             profile = await this.ensureProfile(userId);
         }
         if (profile.password !== passwordReq) {
-            throw new Error('Invalid password');
+            throw new common_2.UnauthorizedException('Invalid password');
         }
         const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
         return { token, userId };
@@ -166,10 +167,10 @@ let UploadService = class UploadService {
     async changePassword(userId, oldPassword, newPassword) {
         const profile = await this.prisma.profile.findUnique({ where: { id: userId } });
         if (!profile || profile.password !== oldPassword) {
-            throw new Error('Invalid old password');
+            throw new common_2.UnauthorizedException('Invalid old password');
         }
         if (!newPassword || newPassword.length < 4)
-            throw new Error('Invalid new password');
+            throw new common_2.BadRequestException('Invalid new password');
         return this.prisma.profile.update({
             where: { id: userId },
             data: { password: newPassword }
