@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id        String    @id @default(uuid())
+  username  String
+  avatarUrl String?
+  password  String    @default("123456789")
+  createdAt DateTime  @default(now())
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  preference       UserPreference?
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  receiverId  String
+  content     String?
+  mediaUrl    String?
+  mediaType   String?
+  mediaKey    String?   // S3 object key for deletion
+  isViewOnce  Boolean  @default(false)
+  viewed      Boolean  @default(false)
+  isEdited    Boolean  @default(false)
+  deleted     Boolean  @default(false)
+  reaction    String?
+  createdAt   DateTime @default(now())
+
+  sender   Profile @relation("SentMessages", fields: [senderId], references: [id])
+  receiver Profile @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model AppSetting {
+  key   String  @id
+  value Boolean
+}
+
+model UserPreference {
+  userId             String  @id
+  allowVideoCalls    Boolean @default(true)
+  allowVoiceCalls    Boolean @default(true)
+  allowAttachments   Boolean @default(true)
+  allowNotifications Boolean @default(true)
+
+  profile Profile @relation(fields: [userId], references: [id])
+}
