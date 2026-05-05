@@ -44,6 +44,12 @@ let UploadController = class UploadController {
     async changePassword(body) {
         return this.uploadService.changePassword(body.userId, body.oldPassword, body.newPassword);
     }
+    async updateUsername(userId, body) {
+        if (!body.username || body.username.trim().length < 1) {
+            throw new common_1.BadRequestException('Name cannot be empty');
+        }
+        return this.uploadService.updateUsername(userId, body.username.trim());
+    }
     async verify(token) {
         return this.uploadService.verifyToken(token);
     }
@@ -108,6 +114,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Patch)('username/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UploadController.prototype, "updateUsername", null);
 __decorate([
     (0, common_1.Get)('verify'),
     __param(0, (0, common_1.Query)('token')),

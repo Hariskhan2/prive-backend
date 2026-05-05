@@ -88,6 +88,15 @@ export declare class UploadController {
         avatarUrl: string | null;
         password: string;
     }>;
+    updateUsername(userId: string, body: {
+        username: string;
+    }): Promise<{
+        id: string;
+        createdAt: Date;
+        username: string;
+        avatarUrl: string | null;
+        password: string;
+    }>;
     verify(token: string): Promise<{
         valid: boolean;
         userId: any;

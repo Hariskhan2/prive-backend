@@ -29,6 +29,13 @@ export declare class UploadService {
         ok: boolean;
     }>;
     private ensureProfile;
+    updateUsername(userId: string, username: string): Promise<{
+        id: string;
+        createdAt: Date;
+        username: string;
+        avatarUrl: string | null;
+        password: string;
+    }>;
     updateAvatar(userId: string, avatarUrl: string): Promise<{
         id: string;
         createdAt: Date;

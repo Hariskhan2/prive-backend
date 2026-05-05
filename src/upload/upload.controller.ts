@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Get, Query, Post, Patch, Body, Param, BadRequestException } from '@nestjs/common';
 import { UploadService } from './upload.service';
 
 @Controller('upload')
@@ -52,6 +52,17 @@ export class UploadController {
     @Post('change-password')
     async changePassword(@Body() body: { userId: string; oldPassword?: string; newPassword?: string }) {
         return this.uploadService.changePassword(body.userId, body.oldPassword, body.newPassword);
+    }
+
+    @Patch('username/:userId')
+    async updateUsername(
+        @Param('userId') userId: string,
+        @Body() body: { username: string },
+    ) {
+        if (!body.username || body.username.trim().length < 1) {
+            throw new BadRequestException('Name cannot be empty');
+        }
+        return this.uploadService.updateUsername(userId, body.username.trim());
     }
 
     @Get('verify')

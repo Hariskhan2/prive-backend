@@ -123,6 +123,17 @@ let UploadService = class UploadService {
             create: { id: userId, username: userId === 'haris_id' ? 'Haris' : 'Ariba' },
         });
     }
+    async updateUsername(userId, username) {
+        if (!username || username.trim().length < 1)
+            throw new common_2.BadRequestException('Name cannot be empty');
+        if (username.trim().length > 30)
+            throw new common_2.BadRequestException('Name too long (max 30 chars)');
+        await this.ensureProfile(userId);
+        return this.prisma.profile.update({
+            where: { id: userId },
+            data: { username: username.trim() },
+        });
+    }
     async updateAvatar(userId, avatarUrl) {
         await this.ensureProfile(userId);
         return this.prisma.profile.update({

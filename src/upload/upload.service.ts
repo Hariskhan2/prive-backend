@@ -94,6 +94,16 @@ export class UploadService {
         });
     }
 
+    async updateUsername(userId: string, username: string) {
+        if (!username || username.trim().length < 1) throw new BadRequestException('Name cannot be empty');
+        if (username.trim().length > 30) throw new BadRequestException('Name too long (max 30 chars)');
+        await this.ensureProfile(userId);
+        return this.prisma.profile.update({
+            where: { id: userId },
+            data: { username: username.trim() },
+        });
+    }
+
     async updateAvatar(userId: string, avatarUrl: string) {
         await this.ensureProfile(userId);
         return this.prisma.profile.update({
