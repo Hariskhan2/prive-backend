@@ -138,6 +138,9 @@ let ChatGateway = class ChatGateway {
             console.error('Failed to mark message as viewed:', e);
         }
     }
+    handleTyping(payload, client) {
+        client.broadcast.emit('typing', payload);
+    }
     handleOffer(payload, client) {
         client.broadcast.emit('offer', { offer: payload.offer, isVideo: payload.isVideo, senderId: client.id });
     }
@@ -200,6 +203,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handleMarkViewed", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('typing'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __param(1, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
+    __metadata("design:returntype", void 0)
+], ChatGateway.prototype, "handleTyping", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('offer'),
     __param(0, (0, websockets_1.MessageBody)()),

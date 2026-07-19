@@ -156,6 +156,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
+    @SubscribeMessage('typing')
+    handleTyping(
+        @MessageBody() payload: { senderId: string; receiverId: string; isTyping: boolean },
+        @ConnectedSocket() client: Socket,
+    ) {
+        client.broadcast.emit('typing', payload);
+    }
+
     // --- WebRTC Signaling ---
     @SubscribeMessage('offer')
     handleOffer(@MessageBody() payload: { offer: any; isVideo?: boolean }, @ConnectedSocket() client: Socket) {

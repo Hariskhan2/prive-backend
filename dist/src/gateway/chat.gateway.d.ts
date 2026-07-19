@@ -34,6 +34,11 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     handleMarkViewed(payload: {
         messageId: string;
     }): Promise<void>;
+    handleTyping(payload: {
+        senderId: string;
+        receiverId: string;
+        isTyping: boolean;
+    }, client: Socket): void;
     handleOffer(payload: {
         offer: any;
         isVideo?: boolean;
