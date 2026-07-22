@@ -13,6 +13,7 @@ export declare class UploadService {
     deleteFromS3(key: string): Promise<void>;
     markViewedAndDelete(messageId: string): Promise<{
         id: string;
+        createdAt: Date;
         senderId: string;
         receiverId: string;
         content: string | null;
@@ -24,24 +25,26 @@ export declare class UploadService {
         isEdited: boolean;
         deleted: boolean;
         reaction: string | null;
-        createdAt: Date;
+        replyToId: string | null;
     } | {
         ok: boolean;
     }>;
     private ensureProfile;
     updateUsername(userId: string, username: string): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     updateAvatar(userId: string, avatarUrl: string): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     getPreferences(userId: string): Promise<{
         userId: string;
@@ -76,10 +79,11 @@ export declare class UploadService {
         } | null;
     } & {
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }) | null>;
     login(userId: string, passwordReq?: string): Promise<{
         token: string;
@@ -87,10 +91,11 @@ export declare class UploadService {
     }>;
     changePassword(userId: string, oldPassword?: string, newPassword?: string): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     verifyToken(token: string): Promise<{
         valid: boolean;

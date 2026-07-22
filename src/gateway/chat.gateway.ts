@@ -34,11 +34,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    handleDisconnect(client: Socket) {
+    async handleDisconnect(client: Socket) {
         console.log(`Client disconnected: ${client.id}`);
         const userId = this.activeSockets.get(client.id);
         if (userId) {
-            this.server.emit('user-offline', userId);
+            const now = new Date();
+            try {
+                await this.prisma.profile.update({
+                    where: { id: userId },
+                    data: { lastSeen: now },
+                });
+            } catch (e) {
+                console.error('Failed to update lastSeen on disconnect:', e);
+            }
+            this.server.emit('user-offline', { userId, lastSeen: now.toISOString() });
         }
         this.activeSockets.delete(client.id);
         this.server.emit('peer-disconnected', client.id);
@@ -47,6 +56,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('join')
     async handleJoin(@MessageBody() payload: { userId: string }, @ConnectedSocket() client: Socket) {
         this.activeSockets.set(client.id, payload.userId);
+        
+        try {
+            await this.prisma.profile.upsert({
+                where: { id: payload.userId },
+                update: { lastSeen: new Date() },
+                create: {
+                    id: payload.userId,
+                    username: payload.userId === 'haris_id' ? 'Haris' : payload.userId === 'ariba_id' ? 'Ariba' : payload.userId,
+                    lastSeen: new Date(),
+                },
+            });
+        } catch (e) {
+            console.error('Failed to update lastSeen on join:', e);
+        }
+
         client.broadcast.emit('user-joined', { userId: payload.userId, socketId: client.id });
 
         // Broadcast new online user
@@ -60,6 +84,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try {
             const messages = await this.prisma.message.findMany({
                 orderBy: { createdAt: 'asc' },
+                include: {
+                    replyTo: true
+                }
             });
             client.emit('load-messages', messages);
         } catch (e) {
@@ -70,7 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // --- Real-Time Chat ---
     @SubscribeMessage('sendMessage')
     async handleSendMessage(
-        @MessageBody() payload: { senderId: string; receiverId: string; content?: string; mediaUrl?: string; mediaType?: string; mediaKey?: string; isViewOnce?: boolean },
+        @MessageBody() payload: { senderId: string; receiverId: string; content?: string; mediaUrl?: string; mediaType?: string; mediaKey?: string; isViewOnce?: boolean; replyToId?: string },
         @ConnectedSocket() client: Socket,
     ) {
         try {
@@ -95,7 +122,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     mediaType: payload.mediaType,
                     mediaKey: payload.mediaKey,
                     isViewOnce: payload.isViewOnce ?? false,
+                    replyToId: payload.replyToId || null,
                 } as Prisma.MessageUncheckedCreateInput,
+                include: {
+                    replyTo: true
+                }
             });
             this.server.emit('newMessage', message);
         } catch (e) {

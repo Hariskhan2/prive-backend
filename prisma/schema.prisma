@@ -12,6 +12,7 @@ model Profile {
   avatarUrl String?
   password  String    @default("123456789")
   createdAt DateTime  @default(now())
+  lastSeen  DateTime  @default(now())
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
@@ -31,10 +32,14 @@ model Message {
   isEdited    Boolean  @default(false)
   deleted     Boolean  @default(false)
   reaction    String?
+  replyToId   String?
   createdAt   DateTime @default(now())
 
   sender   Profile @relation("SentMessages", fields: [senderId], references: [id])
   receiver Profile @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  replyTo  Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: Cascade)
+  replies  Message[] @relation("MessageReplies")
 }
 
 model AppSetting {

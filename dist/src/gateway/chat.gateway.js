@@ -35,17 +35,41 @@ let ChatGateway = class ChatGateway {
             client.emit('config', { FEATURE_VIDEO_ENABLED: true });
         }
     }
-    handleDisconnect(client) {
+    async handleDisconnect(client) {
         console.log(`Client disconnected: ${client.id}`);
         const userId = this.activeSockets.get(client.id);
         if (userId) {
-            this.server.emit('user-offline', userId);
+            const now = new Date();
+            try {
+                await this.prisma.profile.update({
+                    where: { id: userId },
+                    data: { lastSeen: now },
+                });
+            }
+            catch (e) {
+                console.error('Failed to update lastSeen on disconnect:', e);
+            }
+            this.server.emit('user-offline', { userId, lastSeen: now.toISOString() });
         }
         this.activeSockets.delete(client.id);
         this.server.emit('peer-disconnected', client.id);
     }
     async handleJoin(payload, client) {
         this.activeSockets.set(client.id, payload.userId);
+        try {
+            await this.prisma.profile.upsert({
+                where: { id: payload.userId },
+                update: { lastSeen: new Date() },
+                create: {
+                    id: payload.userId,
+                    username: payload.userId === 'haris_id' ? 'Haris' : payload.userId === 'ariba_id' ? 'Ariba' : payload.userId,
+                    lastSeen: new Date(),
+                },
+            });
+        }
+        catch (e) {
+            console.error('Failed to update lastSeen on join:', e);
+        }
         client.broadcast.emit('user-joined', { userId: payload.userId, socketId: client.id });
         client.broadcast.emit('user-online', payload.userId);
         const onlineUsers = Array.from(new Set(this.activeSockets.values()));
@@ -53,6 +77,9 @@ let ChatGateway = class ChatGateway {
         try {
             const messages = await this.prisma.message.findMany({
                 orderBy: { createdAt: 'asc' },
+                include: {
+                    replyTo: true
+                }
             });
             client.emit('load-messages', messages);
         }
@@ -81,7 +108,11 @@ let ChatGateway = class ChatGateway {
                     mediaType: payload.mediaType,
                     mediaKey: payload.mediaKey,
                     isViewOnce: payload.isViewOnce ?? false,
+                    replyToId: payload.replyToId || null,
                 },
+                include: {
+                    replyTo: true
+                }
             });
             this.server.emit('newMessage', message);
         }

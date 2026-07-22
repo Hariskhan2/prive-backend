@@ -7,7 +7,7 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     private activeSockets;
     constructor(prisma: PrismaService);
     handleConnection(client: Socket): Promise<void>;
-    handleDisconnect(client: Socket): void;
+    handleDisconnect(client: Socket): Promise<void>;
     handleJoin(payload: {
         userId: string;
     }, client: Socket): Promise<void>;
@@ -19,6 +19,7 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
         mediaType?: string;
         mediaKey?: string;
         isViewOnce?: boolean;
+        replyToId?: string;
     }, client: Socket): Promise<void>;
     handleDeleteMessage(payload: {
         id: string;

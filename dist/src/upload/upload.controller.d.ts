@@ -12,10 +12,11 @@ export declare class UploadController {
         avatarUrl: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     getPreferences(userId: string): Promise<{
         userId: string;
@@ -39,6 +40,7 @@ export declare class UploadController {
     }>;
     markViewed(messageId: string): Promise<{
         id: string;
+        createdAt: Date;
         senderId: string;
         receiverId: string;
         content: string | null;
@@ -50,7 +52,7 @@ export declare class UploadController {
         isEdited: boolean;
         deleted: boolean;
         reaction: string | null;
-        createdAt: Date;
+        replyToId: string | null;
     } | {
         ok: boolean;
     }>;
@@ -65,10 +67,11 @@ export declare class UploadController {
         } | null;
     } & {
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }) | null>;
     login(body: {
         userId: string;
@@ -83,19 +86,21 @@ export declare class UploadController {
         newPassword?: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     updateUsername(userId: string, body: {
         username: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         username: string;
         avatarUrl: string | null;
         password: string;
+        createdAt: Date;
+        lastSeen: Date;
     }>;
     verify(token: string): Promise<{
         valid: boolean;
