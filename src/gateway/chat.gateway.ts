@@ -97,22 +97,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // --- Real-Time Chat ---
     @SubscribeMessage('sendMessage')
     async handleSendMessage(
-        @MessageBody() payload: { senderId: string; receiverId: string; content?: string; mediaUrl?: string; mediaType?: string; mediaKey?: string; isViewOnce?: boolean; replyToId?: string },
+        @MessageBody() payload: { senderId: string; receiverId: string; content?: string; mediaUrl?: string; mediaType?: string; mediaKey?: string; isViewOnce?: boolean; replyToId?: string; clientTempId?: string },
         @ConnectedSocket() client: Socket,
     ) {
         try {
-            // Ensure profiles exist (idempotent)
-            for (const userId of [payload.senderId, payload.receiverId]) {
-                await this.prisma.profile.upsert({
-                    where: { id: userId },
-                    update: {},
-                    create: {
-                        id: userId,
-                        username: userId === 'haris_id' ? 'Haris' : userId === 'ariba_id' ? 'Ariba' : userId,
-                    },
-                });
-            }
-
+            // Single DB write — profiles are ensured on join; skip per-message upserts (were adding ~1–2s latency)
             const message = await this.prisma.message.create({
                 data: {
                     senderId: payload.senderId,
@@ -124,14 +113,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     isViewOnce: payload.isViewOnce ?? false,
                     replyToId: payload.replyToId || null,
                 } as Prisma.MessageUncheckedCreateInput,
-                include: {
-                    replyTo: true
-                }
+                include: payload.replyToId ? { replyTo: true } : undefined,
             });
-            this.server.emit('newMessage', message);
+            this.server.emit('newMessage', {
+                ...message,
+                clientTempId: payload.clientTempId,
+            });
         } catch (e) {
             console.error('Failed to send message:', e);
-            client.emit('messageError', { error: (e as Error).message });
+            client.emit('messageError', { error: (e as Error).message, clientTempId: payload.clientTempId });
         }
     }
 

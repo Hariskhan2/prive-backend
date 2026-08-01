@@ -20,6 +20,7 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
         mediaKey?: string;
         isViewOnce?: boolean;
         replyToId?: string;
+        clientTempId?: string;
     }, client: Socket): Promise<void>;
     handleDeleteMessage(payload: {
         id: string;

@@ -89,16 +89,6 @@ let ChatGateway = class ChatGateway {
     }
     async handleSendMessage(payload, client) {
         try {
-            for (const userId of [payload.senderId, payload.receiverId]) {
-                await this.prisma.profile.upsert({
-                    where: { id: userId },
-                    update: {},
-                    create: {
-                        id: userId,
-                        username: userId === 'haris_id' ? 'Haris' : userId === 'ariba_id' ? 'Ariba' : userId,
-                    },
-                });
-            }
             const message = await this.prisma.message.create({
                 data: {
                     senderId: payload.senderId,
@@ -110,15 +100,16 @@ let ChatGateway = class ChatGateway {
                     isViewOnce: payload.isViewOnce ?? false,
                     replyToId: payload.replyToId || null,
                 },
-                include: {
-                    replyTo: true
-                }
+                include: payload.replyToId ? { replyTo: true } : undefined,
             });
-            this.server.emit('newMessage', message);
+            this.server.emit('newMessage', {
+                ...message,
+                clientTempId: payload.clientTempId,
+            });
         }
         catch (e) {
             console.error('Failed to send message:', e);
-            client.emit('messageError', { error: e.message });
+            client.emit('messageError', { error: e.message, clientTempId: payload.clientTempId });
         }
     }
     async handleDeleteMessage(payload) {
